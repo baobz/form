@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.js"></script>
+		
+		<style>
+			.wd {
+				display: inline-block;
+				width: 100px;
+				text-align: right;
+			}
+			div {
+				margin: 10px 0;
+			}
+			.btn {
+				margin-left: 100px;
+			}
+			.error {
+				color: red;
+			}
+			
+		</style>
+	</head>
+	<body ng-controller="formCtrl">
+		
+		
+		<form action="" name="myForm">
+			<h3>表单验证</h3>
+			<div>
+				<span class="wd">姓名:</span>
+				<input type="text" name="username" placeholder="用户名" ng-minlength="2" ng-maxlength="15" ng-model="data.username" id="username" required />
+				<span class="error" ng-show="myForm.username.$error.minlength">姓名长度不能小于2位</span>
+				<span class="error" ng-show="myForm.username.$error.maxlength">姓名长度不能大于15 位</span>
+			</div>
+			<div>
+				<span class="wd">性别:</span>
+				<input type="radio" name="sex" value="male" ng-model="data.sex" />男
+				<input type="radio" name="sex" value="female" ng-model="data.sex"/>女
+			</div>
+			<div>
+				<span class="wd">密码:</span>
+				<input type="password" name="pwd" ng-model="data.pwd" placeholder="输入密码" ng-pattern="/^[a-zA-Z]\w{5,17}$/" />
+				<span class="error" ng-show="myForm.pwd.$error.pattern">输入6-18位包括大小写字母或数字的密码</span>
+			</div>
+			<div>
+				<span class="wd">确认密码:</span>
+				<input type="password" name="pwdConfirm" ng-model="data.pwdConfirm" placeholder="再输入一次" required />
+				<span class="error" ng-show="data.pwdConfirm!==data.pwd && myForm.pwd.$dirty">两次密码不一致!</span>
+				<!--myForm.pwd.$dirty 只要用户修改表单,无论是否通过验证,改值都返回true-->
+				
+				<!--未修改的表单 formName.inputFiledName.$pristine 未修改值为true 修改了值为flase-->
+				<!--修改的表单 formName.inputFiledName.$dirty 只要修改,无论是否通过都返回true-->
+				
+				<!--合法的表单 formName.inputFiledName.$valid 表单内容合法时 返回true-->
+				<!--不合法的表单 formName.inputFiledName.$invalid 表单内容不合法时 返回true-->
+			</div>
+			<div>
+				<span class="wd">兴趣:</span>
+				<label ng-repeat="hobby in hobbies">
+					<input type="checkbox" ng-change="checkC(item)" name="hobby" ng-model="hobbyC" value="{{hobby.id}}" />
+					{{hobby.name}}	
+				</label>
+				
+			</div>
+			<div>
+				<span class="wd">城市:</span>
+				<select name="province" id="" class="province" 
+						ng-init="province.id='0'" 
+						ng-model="province.id" 
+						ng-change="provinceChange(province.id)" 
+						ng-options="id as name for (id,name) in provinceArr">
+				</select>
+				选择{{province.id}}
+				<select name="city" class="city" 
+						ng-init="city.id='0'" 
+						ng-model="city.id" 
+						ng-options="id as name for (id,name) in getCityArr"
+						ng-click="cityChange()">
+						<!--<option value="" ng-repeat="item in getCityArr">{{item}}</option>-->
+				</select>
+				选择{{city.id}}
+			</div>
+			<div class="btn">
+				<input type="reset" vaule="重置" />
+				<input type="submit" value="提交" ng-disabled="myForm.$invalid"/>
+			</div>
+		</form>
+		<script>
+			var app = angular.module('myApp', []);
+			app.controller('formCtrl', ['$scope','$http', function($scope,$http) {
+				
+				$scope.hobbies = [
+					{id: '001', name: '新闻'},
+					{id: '002', name: '编程'},
+					{id: '003', name: '娱乐'},
+					{id: '004', name: '运动'},
+					{id: '005', name: '睡觉'}
+				];
+				
+				$http.get('cities.json').success(function(data) {
+					$scope.provinceArr = data.provinceArr;
+					$scope.cities = data.cityArr;
+					$scope.getCityArr = $scope.cities[0];//默认
+					
+					$scope.provinceChange = function(index) {
+						$scope.getCityArr = $scope.cities[index];
+					}
+				})
+			}]);
+		</script>
+	</body>
+</html>
